@@ -13,43 +13,50 @@ class Pareto():
 		"""
 		"""
 		results = read_csv(filename)
-		print(results)
 		self.header = results[0]
 		self.data = results[1]
 
-	def compute_pareto(self):
+	def pareto(self):
 		"""
 		"""
 		self.valorised_consumption()
 		self.cumulative_valorised_consumption()
-		self.abc()
+		self.abc_segmentation()
 
 	def valorised_consumption(self):
 		"""
 		computes the valorised consumption.
 		"""
-		num_of_data = len(self.data)
-		self.data[0].append("consommation valorisee")
+		self.header.append("consommation valorisee")
 
-		for i in range(1,num_of_data):
+		# compute the valorised consumption for each row
+		num_of_data = len(self.data)
+		for i in range(num_of_data):
 			monthly_consumption = self.data[i][1]
 			unit_price = self.data[i][2]
 			self.data[i].append(unit_price * monthly_consumption)
-			print(self.data[i]) # debug
 			
-
 	def cumulative_valorised_consumption(self):
 		"""
 		"""
-		print(self.data)
-		sorted(self.data, key=lambda row: row[-1]) # sort by valorised consumption
-		
+		self.header.append("consomation cumulee")
+		self.data = sorted(self.data, key=lambda row: row[-1], reverse=True) # sort by valorised consumption		
+		for index in range(len(self.data)):
+			if index == 0:
+				self.data[index].append(self.data[index][-1])
+			else:
+				self.data[index].append(self.data[index][-1] + self.data[index-1][-1])
+		self.print_debug(heading="sorted cummulalive valorised consumption")
 
-	def abc(self):
+	def abc_segmentation(self):
 		"""
 		"""
 		pass
 
+	def print_debug(self, heading=""):
+		print("<====={}=====>".format(heading))
+		print(self.header)
+		[print(row) for row in self.data]
 
 def read_csv(filename):
 	"""
@@ -57,28 +64,29 @@ def read_csv(filename):
 	:param filename: name/path to the csv file
 	"""
 	delimiter = ";"
-	print(csv.list_dialects())
+
 	header = []
 	data = []
+
 	with open(filename, 'rt') as csv_file:
 		reader = csv.reader(csv_file, dialect='excel-tab') # type CSV.READER
 		i = 0
 		for row in reader:
-			row_content = row[0]
-			row_content = str.split(row_content, delimiter)
+			row_content = row[0] # in excel-tab dialect, a row is an array containing one str
+			row_content = str.split(row_content, delimiter) # split the string by ;
 
 			if (i==0):
 				header = row_content
+				i += 1
 				continue
 
-			result = []
+			data_row = []
 			for item in row_content:
 				try:
-					result.append(float(item.replace(",", ".")))
+					data_row.append(float(item.replace(",", ".")))
 				except ValueError:
-					result.append(item)
-			data.append(result)
-			print(result) # debug
+					data_row.append(item)
+			data.append(data_row)
 			i += 1
 	return [header, data]
 
@@ -96,7 +104,7 @@ def parse_filename():
 
 
 if __name__ == "__main__":
-	pareto = Pareto()
+	my_pareto = Pareto()
 	filename = parse_filename()
-	pareto.read_data(filename)
-	pareto.compute_pareto()
+	my_pareto.read_data(filename)
+	my_pareto.pareto()
