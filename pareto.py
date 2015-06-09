@@ -29,7 +29,6 @@ class Pareto():
 		"""
 		self.header.append("consommation valorisee")
 
-		# compute the valorised consumption for each row
 		num_of_data = len(self.data)
 		for i in range(num_of_data):
 			monthly_consumption = self.data[i][1]
@@ -38,20 +37,36 @@ class Pareto():
 			
 	def cumulative_valorised_consumption(self):
 		"""
+		Sorted and cumululative consumption.
 		"""
-		self.header.append("consomation cumulee")
+		self.header.append("consommation cumulee")
 		self.data = sorted(self.data, key=lambda row: row[-1], reverse=True) # sort by valorised consumption		
 		for index in range(len(self.data)):
 			if index == 0:
 				self.data[index].append(self.data[index][-1])
 			else:
 				self.data[index].append(self.data[index][-1] + self.data[index-1][-1])
-		self.print_debug(heading="sorted cummulalive valorised consumption")
+		
+		self.print_debug(heading="sorted cumulalive valorised consumption")
 
 	def abc_segmentation(self):
 		"""
+		ABC segmentation.
 		"""
-		pass
+		self.header.append("PCT cumule")
+		self.header.append("Categorie")
+
+		for index in range(len(self.data)):
+			cumulative_pct = self.data[index][-1] / self.data[-1][-1]
+			self.data[index].append(cumulative_pct)
+			if (cumulative_pct <= 0.8):
+				self.data[index].append("A")
+			elif (cumulative_pct > 0.8 and cumulative_pct <= 0.95):
+				self.data[index].append("B")
+			else:
+				self.data[index].append("C")
+		
+		self.print_debug(heading="ABC Segmentation")
 
 	def print_debug(self, heading=""):
 		print("<====={}=====>".format(heading))
