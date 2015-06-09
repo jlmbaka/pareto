@@ -59,11 +59,11 @@ class Pareto():
 		self.header.append("ABC Categorie")
 
 		for index in range(len(self.data)):
-			cumulative_pct = self.data[index][-1] / self.data[-1][-1]
-			self.data[index].append(cumulative_pct)
-			if (cumulative_pct <= 0.8):
+			cumulative_pct_consumption = self.data[index][-1] / self.data[-1][-1]
+			self.data[index].append(cumulative_pct_consumption)
+			if (cumulative_pct_consumption <= 0.8):
 				self.data[index].append("A")
-			elif (cumulative_pct > 0.8 and cumulative_pct <= 0.95):
+			elif (cumulative_pct_consumption > 0.8 and cumulative_pct_consumption <= 0.95):
 				self.data[index].append("B")
 			else:
 				self.data[index].append("C")
@@ -75,15 +75,27 @@ class Pareto():
 		FRM Segmention.
 		"""
 		self.header.append("QTY cumule")
-		self.header.appen("FMR Categorie")
+		self.header.append("FMR Categorie")
 		# cumulative quantity
-		self.data = sorted(self.data, key=lambda row:[1], reverse=True) # sort by quantity
+		# 	sort by quantity
+		self.data = sorted(self.data, key=lambda row:row[1], reverse=True)
+		# 	compute cumulative quantities
 		for index in range(len(self.data)):
 			if index == 0:
-				self.data[index].append(self.data[index][-1])
+				self.data[index].append(self.data[index][1])
 			else:
-				self.data[index].append(self.data[index][-1] + self.data[index-1][-1])
-		# FRM Segmentation 
+				self.data[index].append(self.data[index][1] + self.data[index-1][-1])
+
+		# FRM Segmentation
+		for index in range(len(self.data)):
+			cumulative_pct_qty = self.data[index][-1] / self.data[-1][-1]
+			self.data[index].append(cumulative_pct_qty)
+			if (cumulative_pct_qty <= 0.8):
+				self.data[index].append("F")
+			elif (cumulative_pct_qty > 0.8 and cumulative_pct_qty <= 0.95):
+				self.data[index].append("M")
+			else:
+				self.data[index].append("R")
 		self.print_debug(heading="ABC/FMR Segmention")
 
 	def print_debug(self, heading=""):
