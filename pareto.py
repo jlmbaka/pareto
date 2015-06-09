@@ -18,10 +18,12 @@ class Pareto():
 
 	def pareto(self):
 		"""
+		Pareto analysis
 		"""
 		self.valorised_consumption()
 		self.cumulative_valorised_consumption()
 		self.abc_segmentation()
+		self.fmr_segmentation()
 
 	def valorised_consumption(self):
 		"""
@@ -54,7 +56,7 @@ class Pareto():
 		ABC segmentation.
 		"""
 		self.header.append("PCT cumule")
-		self.header.append("Categorie")
+		self.header.append("ABC Categorie")
 
 		for index in range(len(self.data)):
 			cumulative_pct = self.data[index][-1] / self.data[-1][-1]
@@ -67,6 +69,22 @@ class Pareto():
 				self.data[index].append("C")
 		
 		self.print_debug(heading="ABC Segmentation")
+
+	def fmr_segmentation(self):
+		"""
+		FRM Segmention.
+		"""
+		self.header.append("QTY cumule")
+		self.header.appen("FMR Categorie")
+		# cumulative quantity
+		self.data = sorted(self.data, key=lambda row:[1], reverse=True) # sort by quantity
+		for index in range(len(self.data)):
+			if index == 0:
+				self.data[index].append(self.data[index][-1])
+			else:
+				self.data[index].append(self.data[index][-1] + self.data[index-1][-1])
+		# FRM Segmentation 
+		self.print_debug(heading="ABC/FMR Segmention")
 
 	def print_debug(self, heading=""):
 		print("<====={}=====>".format(heading))
