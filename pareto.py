@@ -1,8 +1,10 @@
 __author__ = "jeanlouis.mbaka"
 
-
 import csv
 import sys
+
+import pandas as pd
+import numpy as np
 
 
 class Pareto():
@@ -11,10 +13,21 @@ class Pareto():
 
 	def read_data(self, filename):
 		"""
+		Read data from filename
 		"""
 		results = read_csv(filename)
 		self.header = results[0]
-		self.data = results[1]
+		self.raw_data = results[1]
+		self.data = self.raw_data
+
+	def write_data(self, filename):
+		"""
+		Write data to filename
+		"""
+		write_csv(filename, self.header, self.data)
+
+	def format_data(self):
+		pass
 
 	def pareto(self):
 		"""
@@ -32,10 +45,17 @@ class Pareto():
 		self.header.append("consommation valorisee")
 
 		num_of_data = len(self.data)
+		print(num_of_data)
 		for i in range(num_of_data):
-			monthly_consumption = self.data[i][1]
-			unit_price = self.data[i][2]
-			self.data[i].append(unit_price * monthly_consumption)
+			try:
+				monthly_consumption = self.data[i][1]
+				unit_price = self.data[i][2]
+				self.data[i].append(unit_price * monthly_consumption)
+			except IndexError:
+				print("faulty index = {}".format(i))
+				print("len(self.data) = {}".format(len(self.data)))
+				print(self.data[i])
+				sys.exit(2)
 			
 	def cumulative_valorised_consumption(self):
 		"""
@@ -120,21 +140,37 @@ def read_csv(filename):
 			row_content = row[0] # in excel-tab dialect, a row is an array containing one str
 			row_content = str.split(row_content, delimiter) # split the string by ;
 
-			if (i==0):
+			# header content
+			if i == 0:
 				header = row_content
 				i += 1
 				continue
 
+			# data content
 			data_row = []
 			for item in row_content:
+				if str.strip(item) == "":
+					break
 				try:
 					data_row.append(float(item.replace(",", ".")))
 				except ValueError:
 					data_row.append(item)
-			data.append(data_row)
+
+			if data_row != []:
+				data.append(data_row)
 			i += 1
 	return [header, data]
 
+def write_csv(filename, header, data):
+	"""
+	Write paretor data to csv
+	:param filename: output filename
+	"""
+	with open(filename, 'wt') as csv_file:
+		writer = csv.writer(csv_file, dialect="excel")
+		writer.writerow(header)
+		for row in data:
+			writer.writerow(row)
 
 def parse_filename():
 	"""
@@ -153,3 +189,4 @@ if __name__ == "__main__":
 	filename = parse_filename()
 	my_pareto.read_data(filename)
 	my_pareto.pareto()
+	my_pareto.write_data("{}_pareto.csv".format(filename))
