@@ -161,6 +161,7 @@ def read_csv(filename):
 			i += 1
 	return [header, data]
 
+
 def write_csv(filename, header, data):
 	"""
 	Write paretor data to csv
@@ -171,6 +172,7 @@ def write_csv(filename, header, data):
 		writer.writerow(header)
 		for row in data:
 			writer.writerow(row)
+
 
 def parse_filename():
 	"""
